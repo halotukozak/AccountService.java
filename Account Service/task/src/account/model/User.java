@@ -1,60 +1,83 @@
 package account.model;
 
-import javax.management.relation.Role;
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import java.util.Collection;
 
 @Entity
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private Long id;
 
+    @NotBlank(message = "Name cannot be blank") String name;
+    @GeneratedValue
     private String username;
+    @NotBlank(message = "Lastname cannot be blank")
+    private String lastname;
+    @NotBlank(message = "Email cannot be blank")
+    @Pattern(regexp = "^\\w+@acme\\.com$", message = "Email should follow the pattern.")
 
+    private String email;
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 
-    private boolean accountNonExpired;
+    private final boolean isAccountNonExpired;
 
-    private boolean accountNonLocked;
+    private final boolean isAccountNonLocked;
 
-    private boolean credentialsNonExpired;
-
-    private boolean enabled;
-
-    @Enumerated(EnumType.STRING)
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<Role> roles;
+    private final boolean isCredentialsNonExpired;
 
     public User() {
-        this.accountNonExpired = true;
-        this.accountNonLocked = true;
-        this.credentialsNonExpired = true;
-        this.enabled = true;
+        this.isAccountNonExpired = true;
+        this.isAccountNonLocked = true;
+        this.isCredentialsNonExpired = true;
+    }
+
+    public User(String firstname, String lastname, String email, String password) {
+        this();
+        this.setName(firstname);
+        this.setLastname(lastname);
+        this.setEmail(email);
+        this.setPassword(password);
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     @Override
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    @Override
+    public boolean isAccountNonExpired() {
+        return isAccountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return isAccountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return isCredentialsNonExpired;
+    }
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 
     @Override
@@ -66,38 +89,34 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
 
     @Override
     public boolean isEnabled() {
         return true;
     }
 
-    public void grantAuthority(Role authority) {
-        if (roles == null) {
-            roles = new ArrayList<>();
-        }
-        roles.add(authority);
+
+    public String getEmail() {
+        return email;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role.toString())));
-        return authorities;
+    public void setEmail(String email) {
+        this.email = email.toLowerCase();
     }
 
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
