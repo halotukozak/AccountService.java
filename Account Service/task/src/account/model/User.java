@@ -1,5 +1,6 @@
 package account.model;
 
+import account.validation.NonPwnedPassword;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -8,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.Collection;
 
 @Entity
@@ -27,6 +29,8 @@ public class User implements UserDetails {
 
     private String email;
     @NotBlank(message = "Password cannot be blank")
+    @Size(min = 12, message = "Password must have at least 12 characters!")
+    @NonPwnedPassword(message = "The password is in the hacker's database!")
     private String password;
 
     private final boolean isAccountNonExpired;

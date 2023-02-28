@@ -1,10 +1,8 @@
 package account.service;
 
 
-import account.exceptions.BreachedPassword;
-import account.exceptions.IdenticalPassword;
-import account.exceptions.TooShortPassword;
 import account.exceptions.UserExistException;
+import account.exceptions.exceptions.IdenticalPassword;
 import account.model.User;
 import account.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,10 +11,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -43,14 +42,8 @@ public class UserService implements UserDetailsService {
         return userRepository.existsByEmail(email.toLowerCase());
     }
 
-    public void validatePassword(String password) {
-        List<String> passwords = List.of("PasswordForJanuary", "PasswordForFebruary", "PasswordForMarch", "PasswordForApril", "PasswordForMay", "PasswordForJune", "PasswordForJuly", "PasswordForAugust", "PasswordForSeptember", "PasswordForOctober", "PasswordForNovember", "PasswordForDecember");
-        if (password.length() < 12) throw new TooShortPassword();
-        if (passwords.contains(password)) throw new BreachedPassword();
-    }
 
     public void changePassword(User user, String newPassword) {
-        validatePassword(newPassword);
         if (passwordEncoder.matches(newPassword, user.getPassword())) throw new IdenticalPassword();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
@@ -58,9 +51,12 @@ public class UserService implements UserDetailsService {
 
     public User createUser(String name, String lastname, String email, String password) {
         if (this.existsEmail(email)) throw new UserExistException();
-        validatePassword(password);
         User user = new User(name, lastname, email, passwordEncoder.encode(password));
         userRepository.save(user);
         return user;
+    }
+
+    public void deleteAll() {
+        userRepository.deleteAll();
     }
 }

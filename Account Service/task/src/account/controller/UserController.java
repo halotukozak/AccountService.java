@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 @Validated
 public class UserController {
     private final UserService userService;
@@ -26,33 +26,17 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/auth/signup")
+    @PostMapping("/signup")
     UserResponse register(@Valid @RequestBody RegistrationRequest request) {
         User user = userService.createUser(request.name(), request.lastname(), request.email(), request.password());
         return new UserResponse(user);
     }
 
 
-    @PostMapping("/auth/changepass")
+    @PostMapping("/changepass")
     ChangePasswordResponse changePass(@Valid @RequestBody ChangePasswordRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         User user = (User) userDetails;
         userService.changePassword(user, request.new_password());
         return new ChangePasswordResponse(user.getEmail());
     }
-
-//    @PutMapping("/api/admin/user/role")
-//    void changeUserRole(User user){
-//        this.userList.get(user.)
-//    }
-
-//    @DeleteMapping("api/admin/user")
-//    void deleteUser(User user) {
-//        this.userList.remove(user);
-//    }
-//
-//    @GetMapping("/api/admin/user")
-//    public List<User> getUsers() {
-//        return this.userList;
-//    }
-
 }

@@ -32,9 +32,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic().authenticationEntryPoint(restAuthenticationEntryPoint) // Handle auth error
                 .and().csrf().disable().headers().frameOptions().disable()// for Postman, the H2 console
                 .and().authorizeRequests() // manage access
-                .mvcMatchers("/api/empl/payment", "/api/auth/changepass").authenticated() // manage access
-                .antMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
-                // other matchers
+                .mvcMatchers(HttpMethod.POST, "/api/auth/changepass").authenticated() // manage access
+                .mvcMatchers(HttpMethod.GET, "/api/empl/payment").authenticated() //
+                .antMatchers(HttpMethod.POST, "/api/auth/signup", "/api/empl/payment").permitAll() //
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // no session
     }
 

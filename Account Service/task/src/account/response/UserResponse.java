@@ -1,10 +1,10 @@
 package account.response;
 
 import account.model.User;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+@ResponseBody
 public class UserResponse {
-
-
     private final Long id;
     private final String name;
     private final String lastname;
@@ -16,6 +16,7 @@ public class UserResponse {
         this.lastname = user.getLastname();
         this.email = user.getEmail();
     }
+
 
     public String getName() {
         return name;
