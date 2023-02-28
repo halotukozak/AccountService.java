@@ -1,7 +1,7 @@
-package account.response;
+package account.http.response;
 
-import account.model.Payment;
-import account.model.User;
+import account.db.model.Payment;
+import account.db.model.User;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.YearMonth;

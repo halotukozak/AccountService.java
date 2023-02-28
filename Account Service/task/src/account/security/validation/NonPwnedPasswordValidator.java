@@ -1,4 +1,4 @@
-package account.validation;
+package account.security.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

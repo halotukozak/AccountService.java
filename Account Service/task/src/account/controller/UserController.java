@@ -1,10 +1,10 @@
 package account.controller;
 
-import account.model.User;
-import account.request.ChangePasswordRequest;
-import account.request.RegistrationRequest;
-import account.response.ChangePasswordResponse;
-import account.response.UserResponse;
+import account.db.model.User;
+import account.http.request.ChangePasswordRequest;
+import account.http.request.RegistrationRequest;
+import account.http.response.ChangePasswordResponse;
+import account.http.response.UserResponse;
 import account.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;

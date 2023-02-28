@@ -1,4 +1,4 @@
-package account.response;
+package account.http.response;
 
 public record ChangePasswordResponse(String email) {
 

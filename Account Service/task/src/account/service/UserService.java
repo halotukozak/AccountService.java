@@ -3,8 +3,8 @@ package account.service;
 
 import account.exceptions.UserExistException;
 import account.exceptions.exceptions.IdenticalPassword;
-import account.model.User;
-import account.repository.UserRepository;
+import account.db.model.User;
+import account.db.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

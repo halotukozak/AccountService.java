@@ -1,4 +1,4 @@
-package account.request;
+package account.http.request;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

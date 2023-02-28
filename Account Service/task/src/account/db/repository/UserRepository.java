@@ -1,6 +1,6 @@
-package account.repository;
+package account.db.repository;
 
-import account.model.User;
+import account.db.model.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

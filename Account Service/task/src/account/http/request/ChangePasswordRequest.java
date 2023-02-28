@@ -1,6 +1,6 @@
-package account.request;
+package account.http.request;
 
-import account.validation.NonPwnedPassword;
+import account.security.validation.NonPwnedPassword;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

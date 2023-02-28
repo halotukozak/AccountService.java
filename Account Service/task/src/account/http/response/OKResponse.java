@@ -1,4 +1,4 @@
-package account.response;
+package account.http.response;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

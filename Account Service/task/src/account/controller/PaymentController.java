@@ -1,10 +1,10 @@
 package account.controller;
 
-import account.model.Payment;
-import account.model.User;
-import account.request.PaymentRequest;
-import account.response.OKResponse;
-import account.response.PaymentResponse;
+import account.db.model.Payment;
+import account.db.model.User;
+import account.http.request.PaymentRequest;
+import account.http.response.OKResponse;
+import account.http.response.PaymentResponse;
 import account.service.PaymentService;
 import account.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
