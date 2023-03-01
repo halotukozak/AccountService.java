@@ -13,11 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity(debug = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
-
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     public SecurityConfig(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, RestAuthenticationEntryPoint restAuthenticationEntryPoint) {
@@ -32,9 +29,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic().authenticationEntryPoint(restAuthenticationEntryPoint) // Handle auth error
                 .and().csrf().disable().headers().frameOptions().disable()// for Postman, the H2 console
                 .and().authorizeRequests() // manage access
+                .antMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()//
                 .mvcMatchers(HttpMethod.POST, "/api/auth/changepass").authenticated() // manage access
-                .mvcMatchers(HttpMethod.GET, "/api/empl/payment").authenticated() //
-                .antMatchers(HttpMethod.POST, "/api/auth/signup", "/api/empl/payment").permitAll() //
+                .mvcMatchers(HttpMethod.GET, "/api/empl/payment").hasAuthority("READ_PAYMENT")//
+                .mvcMatchers(HttpMethod.POST, "/api/acct/payments").hasAuthority("UPLOAD_PAYMENT")//
+                .mvcMatchers(HttpMethod.POST, "/api/acct/payments").hasAuthority("UPLOAD_PAYMENT")//
+//                .mvcMatchers("/api/admin/user", "/api/admin/user/role").hasRole("ADMIN")//
+                .mvcMatchers("/api/admin/user", "/api/admin/user/role").hasAuthority("GIVE_ROLE")//
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // no session
     }
 
@@ -42,4 +43,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
+
+//    @Bean
+//    public AccessDeniedHandler accessDeniedHandler() {
+//        return new AccessDeniedHandler();
+//    }
 }

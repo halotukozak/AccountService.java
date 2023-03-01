@@ -20,7 +20,6 @@ import java.util.Objects;
 @ControllerAdvice
 public class ValidationException extends ResponseEntityExceptionHandler {
 
-    // @Validate For Validating Path Variables and Request Parameters
     @ExceptionHandler(ConstraintViolationException.class)
     public void constraintViolationException(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value());
@@ -37,7 +36,6 @@ public class ValidationException extends ResponseEntityExceptionHandler {
         String path = request.toString().substring(request.toString().indexOf("/"), request.toString().indexOf(";"));
         System.out.println(path);
 
-        // Just like a POJO, a Map is also converted to a JSON key-value structure
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", status.value());

@@ -1,4 +1,7 @@
-package account.db.model;
+package account.model;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -6,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,23 +24,6 @@ public class Payment {
         this.employee = employee;
         this.period = period;
         this.salary = salary;
-    }
-
-    public Payment() {
-
-    }
-
-
-    public String getEmployee() {
-        return employee;
-    }
-
-    public String getPeriod() {
-        return period;
-    }
-
-    public Long getSalary() {
-        return salary;
     }
 
     public void setSalary(Long salary) {

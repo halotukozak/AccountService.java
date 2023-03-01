@@ -1,10 +1,10 @@
 package account.service;
 
+import account.db.repository.PaymentRepository;
 import account.exceptions.NoSuchPaymentException;
 import account.exceptions.OccupiedPeriodException;
-import account.db.model.Payment;
-import account.db.repository.PaymentRepository;
 import account.http.request.PaymentRequest;
+import account.model.Payment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +50,11 @@ public class PaymentService {
 
     public void updatePayment(String employee, String period, Long salary) {
         Payment payment = paymentRepository.findByEmployeeAndPeriod(employee, period);
-        payment.setSalary(salary);
+        if (payment == null) {
+            payment = new Payment(employee, period, salary);
+        } else {
+            payment.setSalary(salary);
+        }
         paymentRepository.save(payment);
     }
 }

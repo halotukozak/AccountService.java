@@ -1,7 +1,10 @@
-package account.db.model;
+package account.model;
 
 import account.security.validation.NonPwnedPassword;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
@@ -9,14 +12,19 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
+@Getter
+@Setter
 public class User implements UserDetails {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank(message = "Name cannot be blank") String name;
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private String username;
     @NotBlank(message = "Lastname cannot be blank")
     private String lastname;
@@ -26,17 +34,11 @@ public class User implements UserDetails {
     private String email;
     @NotBlank(message = "Password cannot be blank")
     @Size(min = 12, message = "Password must have at least 12 characters!")
-    @NonPwnedPassword(message = "The password is in the hacker's database!")
+    @NonPwnedPassword()
     private String password;
 
-    @ManyToMany
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(
-                    name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(
-                    name = "role_id", referencedColumnName = "id"))
-    private Collection<Role> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Collection<Role> roles = new LinkedHashSet<>();
 
     private final boolean isAccountNonExpired;
 
@@ -58,74 +60,27 @@ public class User implements UserDetails {
         this.setPassword(password);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return isAccountNonExpired;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return isAccountNonLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return isCredentialsNonExpired;
-    }
-
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-
-    public String getEmail() {
-        return email;
-    }
-
     public void setEmail(String email) {
         this.email = email.toLowerCase();
     }
 
-    public String getLastname() {
-        return lastname;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (Role role : roles) {
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
+            role.getPrivileges().stream().map(p -> new SimpleGrantedAuthority(p.getName())).forEach(authorities::add);
+        }
+        return authorities;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    @Override
+    public boolean isEnabled() {
+        return isAccountNonExpired && isAccountNonLocked && isCredentialsNonExpired;
     }
 
-    public String getName() {
-        return name;
+    public void giveRole(Role role) {
+        this.roles.add(role);
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 }

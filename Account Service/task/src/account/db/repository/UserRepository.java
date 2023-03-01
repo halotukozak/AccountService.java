@@ -1,15 +1,17 @@
 package account.db.repository;
 
-import account.db.model.User;
-import org.springframework.data.repository.CrudRepository;
+import account.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
-public interface UserRepository extends CrudRepository<User, Long> {
 
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     Optional<User> findByEmail(String toLowerCase);
+
+    Long deleteByEmail(String toLowerCase);
 }

@@ -1,10 +1,15 @@
-package account.db.model;
+package account.model;
 
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Collection;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class Privilege {
 
     @Id
@@ -15,4 +20,8 @@ public class Privilege {
 
     @ManyToMany(mappedBy = "privileges")
     private Collection<Role> roles;
+
+    public Privilege(String name) {
+        this.name = name;
+    }
 }

@@ -1,7 +1,7 @@
 package account.controller;
 
-import account.db.model.Payment;
-import account.db.model.User;
+import account.model.Payment;
+import account.model.User;
 import account.http.request.PaymentRequest;
 import account.http.response.OKResponse;
 import account.http.response.PaymentResponse;
