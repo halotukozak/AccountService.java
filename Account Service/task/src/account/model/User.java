@@ -3,6 +3,7 @@ package account.model;
 import account.security.validation.NonPwnedPassword;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SortNatural;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,8 +24,9 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "Name cannot be blank") String name;
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @NotBlank(message = "Name cannot be blank")
+    String name;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String username;
     @NotBlank(message = "Lastname cannot be blank")
     private String lastname;
@@ -37,6 +39,7 @@ public class User implements UserDetails {
     @NonPwnedPassword()
     private String password;
 
+    @SortNatural
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new LinkedHashSet<>();
 
@@ -79,8 +82,26 @@ public class User implements UserDetails {
         return isAccountNonExpired && isAccountNonLocked && isCredentialsNonExpired;
     }
 
+    public boolean isAdmin() {
+        return this.roles.stream().map(Role::getName).toList().contains(Role.ADMIN);
+    }
+
+    public boolean isBusinessUser() {
+        return this.roles.stream().map(Role::getName).anyMatch(Role.BUSINESS::contains);
+    }
+
     public void giveRole(Role role) {
         this.roles.add(role);
     }
 
+    public boolean removeRole(Role role) {
+        if (role.getName().equals(Role.ADMIN)) throw new RemoveAdministratorException();
+        if (this.roles.size() < 2) throw new RemoveLastRoleException();
+        return this.roles.remove(role);
+    }
+
+    @Override
+    public String toString() {
+        return this.email + ", " + this.roles;
+    }
 }

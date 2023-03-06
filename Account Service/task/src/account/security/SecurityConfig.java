@@ -1,5 +1,6 @@
 package account.security;
 
+import account.model.Role;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -10,6 +11,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static account.model.Privilege.READ_PAYMENT;
+import static account.model.Privilege.UPLOAD_PAYMENT;
+
 @Configuration
 @EnableWebSecurity(debug = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -18,7 +22,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     public SecurityConfig(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, RestAuthenticationEntryPoint restAuthenticationEntryPoint) {
-
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
@@ -31,11 +34,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().authorizeRequests() // manage access
                 .antMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()//
                 .mvcMatchers(HttpMethod.POST, "/api/auth/changepass").authenticated() // manage access
-                .mvcMatchers(HttpMethod.GET, "/api/empl/payment").hasAuthority("READ_PAYMENT")//
-                .mvcMatchers(HttpMethod.POST, "/api/acct/payments").hasAuthority("UPLOAD_PAYMENT")//
-                .mvcMatchers(HttpMethod.POST, "/api/acct/payments").hasAuthority("UPLOAD_PAYMENT")//
-//                .mvcMatchers("/api/admin/user", "/api/admin/user/role").hasRole("ADMIN")//
-                .mvcMatchers("/api/admin/user", "/api/admin/user/role").hasAuthority("GIVE_ROLE")//
+                .mvcMatchers(HttpMethod.GET, "/api/empl/payment").hasAuthority(READ_PAYMENT)//
+                .mvcMatchers(HttpMethod.POST, "/api/acct/payments").hasAuthority(UPLOAD_PAYMENT)//
+                .mvcMatchers(HttpMethod.PUT, "/api/acct/payments").hasAuthority(UPLOAD_PAYMENT)//
+                .mvcMatchers("/api/admin/**").hasAuthority(Role.ADMIN) //
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // no session
     }
 
@@ -44,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 
-//    @Bean
+    //    @Bean
 //    public AccessDeniedHandler accessDeniedHandler() {
 //        return new AccessDeniedHandler();
 //    }

@@ -3,17 +3,18 @@ package account.service;
 
 import account.db.repository.RoleRepository;
 import account.db.repository.UserRepository;
-import account.exceptions.UserExistException;
+import account.exceptions.*;
 import account.exceptions.exceptions.IdenticalPassword;
+import account.model.Role;
 import account.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,7 +24,6 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private boolean isAdminSet = false;
 
     @Autowired
     public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
@@ -47,10 +47,11 @@ public class UserService implements UserDetailsService {
     public User registerUser(String name, String lastname, String email, String password) {
         if (this.existsEmail(email)) throw new UserExistException();
         User user = new User(name, lastname, email, passwordEncoder.encode(password));
-        user.giveRole(roleRepository.findByName("ROLE_USER"));
-        if (!isAdminSet) {
-            user.giveRole(roleRepository.findByName("USER_ADMIN"));
-            isAdminSet = true;
+
+        if (userRepository.existsByRoles_Name(Role.ADMIN)) {
+            user.giveRole(roleRepository.findByName(Role.USER));
+        } else {
+            user.giveRole(roleRepository.findByName(Role.ADMIN));
         }
         userRepository.save(user);
         return user;
@@ -62,24 +63,50 @@ public class UserService implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws EmailNotFoundException {
         Optional<User> user = userRepository.findByEmail(email.toLowerCase());
 
         if (user.isPresent()) {
             return user.get();
         } else {
-            throw new UsernameNotFoundException("Email[" + email + "] not found");
+            throw new EmailNotFoundException();
         }
     }
 
 
-    public void deleteUserByEmail(String email) throws UsernameNotFoundException {
-        Long count = userRepository.deleteByEmail(email.toLowerCase());
-
-        if (count == 0) {
-            throw new UsernameNotFoundException("Email[" + email + "] not found");
+    public void deleteUserByEmail(String email) throws EmailNotFoundException, RemoveAdministratorException {
+        User user = (User) loadUserByUsername(email);
+        if (user.isAdmin()) {
+            throw new RemoveAdministratorException();
         }
+        userRepository.deleteByEmail(email.toLowerCase());
+
     }
 
+    public List<User> loadAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User giveRole(String email, String role_name) {
+        User user = (User) loadUserByUsername(email);
+        Role role = roleRepository.findByName(role_name);
+        if (role == null) throw new RoleNotFoundException();
+        if ((role_name.equals(Role.ADMIN) && user.isBusinessUser()) || ((Role.BUSINESS.contains(role_name) && user.isAdmin())))
+            throw new InvalidRoleCombinationException();
+        user.giveRole(role);
+        userRepository.save(user);
+        return user;
+    }
+
+    public User removeRole(String email, String role_name) {
+        User user = (User) loadUserByUsername(email);
+
+        Role role = roleRepository.findByName(role_name);
+        if (role == null) throw new RoleNotFoundException();
+        if (!user.removeRole(role)) throw new UserDoesNotHaveRoleException();
+        userRepository.save(user);
+        return user;
+
+    }
 }
 

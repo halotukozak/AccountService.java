@@ -7,15 +7,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.Map;
 
 @ResponseStatus(HttpStatus.OK)
-public class OKResponse extends ResponseEntity<Map<String, String>> {
+public class DeletedUserResponse extends ResponseEntity<Map<String, String>> {
 
-    public OKResponse() {
-        super(HttpStatus.OK);
+    public DeletedUserResponse(String email) {
+        super(Map.of("user", email, "status", "Deleted successfully!"), HttpStatus.OK);
     }
-
-    public OKResponse(String message) {
-        super(Map.of("status", message), HttpStatus.OK);
-    }
-
-
 }

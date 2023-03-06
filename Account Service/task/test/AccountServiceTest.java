@@ -124,7 +124,7 @@ public class AccountServiceTest extends SpringTest {
   private final String jDShortPass = new TestReq().setProps("new_password", "oMoa3Vvqn").toJson();
   private final String jDPass = new TestReq().setProps("new_password", "aNob5VvqzRtb").toJson();
 
-  private String paymentsList = convert(new String[]{
+  private final String paymentsList = convert(new String[]{
           new TestReq().setProps("employee", "ivanivanov@acme.com").setProps("period", "01-2021")
                   .setProps("salary", 654321).toJson(),
           new TestReq().setProps("employee", "ivanivanov@acme.com").setProps("period", "02-2021")
@@ -140,7 +140,7 @@ public class AccountServiceTest extends SpringTest {
   });
   private final String wrongPaymentListData = convert(new String[]{new TestReq().setProps("employee", "maxmustermann@acme.com")
           .setProps("period", "13-2021").setProps("salary", 123456).toJson()});
-  private  String wrongPaymentListSalary = convert(new String[]{new TestReq().setProps("employee", "johndoe@acme.com")
+  private final String wrongPaymentListSalary = convert(new String[]{new TestReq().setProps("employee", "johndoe@acme.com")
           .setProps("period", "11-2022").setProps("salary", -1).toJson()});
   private final String wrongPaymentListDuplicate = convert(new String[]{
           new TestReq().setProps("employee", "maxmustermann@acme.com").setProps("period", "01-2021")
@@ -403,7 +403,7 @@ public class AccountServiceTest extends SpringTest {
         return CheckResult.wrong("POST " + api + " should respond with "
                 + "status code 400 , responded: " + response.getStatusCode() + "\n"
                 + "Response body:\n" + response.getContent() + "\n"
-                + "Request body:\n" + json.toString() + "\n"
+                + "Request body:\n" + json + "\n"
                 + message);
       }
       expect(response.getContent()).asJson().check(

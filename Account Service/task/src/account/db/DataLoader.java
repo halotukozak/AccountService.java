@@ -1,18 +1,23 @@
 package account.db;
 
-import account.model.Privilege;
-import account.model.Role;
 import account.db.repository.PrivilegeRepository;
 import account.db.repository.RoleRepository;
+import account.model.Privilege;
+import account.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+
+import static account.model.Privilege.*;
+import static account.model.Privilege.REMOVE_USER;
 
 @Component
 public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
@@ -32,20 +37,19 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
         if (alreadySetup) return;
 
-        Privilege changePass = createPrivilegeIfNotFound("CHANGE_PASS");
-        Privilege getPayment = createPrivilegeIfNotFound("READ_PAYMENT");
-        Privilege uploadPayment = createPrivilegeIfNotFound("UPLOAD_PAYMENT");
-        Privilege getUser = createPrivilegeIfNotFound("READ_USER");
-        Privilege deleteUser = createPrivilegeIfNotFound("DELETE_USER");
-        Privilege giveRole = createPrivilegeIfNotFound("GIVE_ROLE");
+        Privilege getPayment = createPrivilegeIfNotFound(Privilege.READ_PAYMENT);
+        Privilege uploadPayment = createPrivilegeIfNotFound(Privilege.UPLOAD_PAYMENT);
+        Privilege getUser = createPrivilegeIfNotFound(Privilege.READ_USER);
+        Privilege deleteUser = createPrivilegeIfNotFound(Privilege.REMOVE_USER);
+        Privilege manageRole = createPrivilegeIfNotFound(Privilege.MANAGE_ROLE);
 
-        List<Privilege> userPrivileges = Arrays.asList(changePass, getPayment);
-        List<Privilege> accountantPrivileges = Arrays.asList(changePass, getPayment, uploadPayment);
-        List<Privilege> adminPrivileges = Arrays.asList(changePass, getUser, deleteUser, giveRole);
+        List<Privilege> userPrivileges = Collections.singletonList(getPayment);
+        List<Privilege> accountantPrivileges = Arrays.asList(getPayment, uploadPayment);
+        List<Privilege> adminPrivileges = Arrays.asList(getUser, deleteUser, manageRole);
 
-        createRoleIfNotFound("ROLE_USER", userPrivileges);
-        createRoleIfNotFound("ROLE_ACCOUNTANT", accountantPrivileges);
-        createRoleIfNotFound("ROLE_ADMIN", adminPrivileges);
+        createRoleIfNotFound(Role.USER, userPrivileges);
+        createRoleIfNotFound(Role.ACCOUNTANT, accountantPrivileges);
+        createRoleIfNotFound(Role.ADMIN, adminPrivileges);
 
         alreadySetup = true;
     }

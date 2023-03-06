@@ -1,14 +1,16 @@
 package account.controller;
 
+import account.exceptions.InvalidMethodException;
 import account.http.request.GiveRoleRequest;
-import account.http.response.OKResponse;
+import account.http.response.DeletedUserResponse;
 import account.http.response.UserResponse;
 import account.model.User;
 import account.service.UserService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/user")
@@ -21,20 +23,25 @@ public class AdminController {
     }
 
     @GetMapping
-    UserResponse getUser() {
-
-        return new UserResponse((User) userService.loadUserByUsername(""));
+    List<UserResponse> getUser() {
+        List<User> users = userService.loadAllUsers();
+        return users.stream().map(UserResponse::new).collect(Collectors.toList());
     }
 
-    @DeleteMapping
-    OKResponse deleteUser() {
-        userService.deleteUserByEmail("");
-        return new OKResponse("");
+    @DeleteMapping("/{email}")
+    DeletedUserResponse deleteUser(@PathVariable String email) {
+        userService.deleteUserByEmail(email);
+        return new DeletedUserResponse(email);
     }
 
     @PutMapping("/role")
-    OKResponse giveRole(@Valid @RequestBody GiveRoleRequest request) {
-
-        return new OKResponse("");
+    UserResponse manageRole(@RequestBody GiveRoleRequest request) {
+        String roleName = "ROLE_" + request.role();
+        User user = switch (request.operation()) {
+            case "GRANT" -> userService.giveRole(request.user(), roleName);
+            case "REMOVE" -> userService.removeRole(request.user(), roleName);
+            default -> throw new InvalidMethodException();
+        };
+        return new UserResponse(user);
     }
 }

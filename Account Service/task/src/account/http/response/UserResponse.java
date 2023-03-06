@@ -14,13 +14,13 @@ public class UserResponse {
     private final String name;
     private final String lastname;
     private final String email;
-    private final Collection<Role> roles;
+    private final Collection<String> roles;
 
     public UserResponse(User user) {
         this.id = user.getId();
         this.name = user.getName();
         this.lastname = user.getLastname();
         this.email = user.getEmail();
-        this.roles = user.getRoles();
+        this.roles = user.getRoles().stream().map(Role::getName).sorted().toList();
     }
 }
