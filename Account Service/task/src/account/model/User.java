@@ -1,5 +1,8 @@
 package account.model;
 
+import account.exceptions.RemoveAdministratorException;
+import account.exceptions.RemoveLastRoleException;
+import account.exceptions.UserDoesNotHaveRoleException;
 import account.security.validation.NonPwnedPassword;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,8 +27,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "Name cannot be blank")
-    String name;
+    @NotBlank(message = "Name cannot be blank") String name;
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String username;
     @NotBlank(message = "Lastname cannot be blank")
@@ -96,6 +98,7 @@ public class User implements UserDetails {
 
     public boolean removeRole(Role role) {
         if (role.getName().equals(Role.ADMIN)) throw new RemoveAdministratorException();
+        if (!this.roles.contains(role)) throw new UserDoesNotHaveRoleException();
         if (this.roles.size() < 2) throw new RemoveLastRoleException();
         return this.roles.remove(role);
     }

@@ -103,7 +103,7 @@ public class UserService implements UserDetailsService {
 
         Role role = roleRepository.findByName(role_name);
         if (role == null) throw new RoleNotFoundException();
-        if (!user.removeRole(role)) throw new UserDoesNotHaveRoleException();
+        user.removeRole(role);
         userRepository.save(user);
         return user;
 
