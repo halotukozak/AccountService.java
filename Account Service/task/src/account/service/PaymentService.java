@@ -1,10 +1,10 @@
 package account.service;
 
+import account.db.model.Payment;
 import account.db.repository.PaymentRepository;
 import account.exceptions.NoSuchPaymentException;
 import account.exceptions.OccupiedPeriodException;
 import account.http.request.PaymentRequest;
-import account.model.Payment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +17,12 @@ import java.util.List;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final EventService eventService;
 
     @Autowired
-    public PaymentService(PaymentRepository paymentRepository) {
+    public PaymentService(PaymentRepository paymentRepository, EventService eventService) {
         this.paymentRepository = paymentRepository;
+        this.eventService = eventService;
     }
 
     public Payment getPayment(String employee, String period) {
@@ -33,7 +35,6 @@ public class PaymentService {
         return paymentRepository.findAllByEmployeeOrderByPeriodDesc(employee);
     }
 
-    @Transactional
     public void createPayment(String employee, String period, Long salary) {
         if (!paymentRepository.existsByEmployeeAndPeriod(employee, period)) {
             paymentRepository.save(new Payment(employee, period, salary));

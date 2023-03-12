@@ -1,4 +1,4 @@
-package account.model;
+package account.db.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

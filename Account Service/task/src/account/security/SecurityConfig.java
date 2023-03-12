@@ -1,6 +1,6 @@
 package account.security;
 
-import account.model.Role;
+import account.db.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,8 +10,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
-import static account.model.Privilege.READ_PAYMENT;
-import static account.model.Privilege.UPLOAD_PAYMENT;
+import static account.db.model.Privilege.READ_PAYMENT;
+import static account.db.model.Privilege.UPLOAD_PAYMENT;
 
 @Configuration
 @EnableWebSecurity(debug = true)
@@ -28,8 +28,9 @@ public class SecurityConfig {
                 .mvcMatchers(HttpMethod.POST, "/api/acct/payments").hasAuthority(UPLOAD_PAYMENT)//
                 .mvcMatchers(HttpMethod.PUT, "/api/acct/payments").hasAuthority(UPLOAD_PAYMENT)//
                 .mvcMatchers("/api/admin/**").hasAuthority(Role.ADMIN)//
+                .mvcMatchers("/api/admin/user/**").hasAuthority(Role.ADMIN)//
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)//
-                .and().exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+                .and().exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         ;
         return http.build();
     }
@@ -38,4 +39,5 @@ public class SecurityConfig {
     public AccessDeniedHandler accessDeniedHandler() {
         return new AccessDeniedHandlerImpl();
     }
+
 }

@@ -2,12 +2,11 @@ package account.db;
 
 import account.db.repository.PrivilegeRepository;
 import account.db.repository.RoleRepository;
-import account.model.Privilege;
-import account.model.Role;
+import account.db.model.Privilege;
+import account.db.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -15,9 +14,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import static account.model.Privilege.*;
-import static account.model.Privilege.REMOVE_USER;
 
 @Component
 public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {

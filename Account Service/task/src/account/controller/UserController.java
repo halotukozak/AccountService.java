@@ -1,6 +1,6 @@
 package account.controller;
 
-import account.model.User;
+import account.db.model.User;
 import account.http.request.ChangePasswordRequest;
 import account.http.request.RegistrationRequest;
 import account.http.response.ChangePasswordResponse;

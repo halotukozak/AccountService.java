@@ -1,4 +1,4 @@
-package account.model;
+package account.db.model;
 
 import account.exceptions.RemoveAdministratorException;
 import account.exceptions.RemoveLastRoleException;
@@ -47,7 +47,8 @@ public class User implements UserDetails {
 
     private final boolean isAccountNonExpired;
 
-    private final boolean isAccountNonLocked;
+    private boolean isAccountNonLocked;
+    private int failedAttempt = 0;
 
     private final boolean isCredentialsNonExpired;
 
@@ -106,5 +107,22 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return this.email + ", " + this.roles;
+    }
+
+    public void increaseAttempt() {
+        this.failedAttempt++;
+    }
+
+    public void resetAttempt() {
+        this.failedAttempt = 0;
+    }
+
+    public void lock() {
+        this.isAccountNonLocked = false;
+    }
+
+    public void unlock() {
+        this.isAccountNonLocked = true;
+
     }
 }

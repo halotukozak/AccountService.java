@@ -1,12 +1,12 @@
 package account.service;
 
 
+import account.db.model.Role;
+import account.db.model.User;
 import account.db.repository.RoleRepository;
 import account.db.repository.UserRepository;
 import account.exceptions.*;
 import account.exceptions.exceptions.IdenticalPassword;
-import account.model.Role;
-import account.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,6 +24,10 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+
+
+    public static final int MAX_FAILED_ATTEMPTS = 5;
+
 
     @Autowired
     public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
@@ -107,6 +111,29 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
         return user;
 
+    }
+
+    public void increaseFailedAttempts(User user) {
+        user.increaseAttempt();
+        if (user.getFailedAttempt() >= MAX_FAILED_ATTEMPTS) user.lock();
+        userRepository.save(user);
+    }
+
+    public void restFailedAttempts(User user) {
+        user.resetAttempt();
+        userRepository.save(user);
+    }
+
+    public void lock(String email) {
+        User user = (User) loadUserByUsername(email);
+        user.lock();
+        userRepository.save(user);
+    }
+
+    public void unlock(String email) {
+        User user = (User) loadUserByUsername(email);
+        user.unlock();
+        userRepository.save(user);
     }
 }
 

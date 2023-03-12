@@ -1,11 +1,9 @@
 package account.db.repository;
 
-import account.db.model.Privilege;
+import account.db.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-
 @Repository
-public interface PrivilegeRepository extends JpaRepository<Privilege, Long> {
-    Privilege findByName(String name);
+public interface EventRepository extends JpaRepository<Event, Long> {
 }

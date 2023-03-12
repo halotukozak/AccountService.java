@@ -1,7 +1,7 @@
 package account.http.response;
 
-import account.model.Role;
-import account.model.User;
+import account.db.model.Role;
+import account.db.model.User;
 import lombok.Getter;
 import org.springframework.web.bind.annotation.ResponseBody;
 
