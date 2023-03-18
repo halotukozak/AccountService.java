@@ -46,6 +46,7 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         createRoleIfNotFound(Role.USER, userPrivileges);
         createRoleIfNotFound(Role.ACCOUNTANT, accountantPrivileges);
         createRoleIfNotFound(Role.ADMIN, adminPrivileges);
+        createRoleIfNotFound(Role.AUDITOR, adminPrivileges);
 
         alreadySetup = true;
     }

@@ -1,6 +1,7 @@
 package account.security;
 
 import account.db.model.Role;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -8,7 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 
 import static account.db.model.Privilege.READ_PAYMENT;
 import static account.db.model.Privilege.UPLOAD_PAYMENT;
@@ -17,9 +17,12 @@ import static account.db.model.Privilege.UPLOAD_PAYMENT;
 @EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
+    @Autowired
+    AccessDeniedHandlerImpl accessDeniedHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.httpBasic() // Handle auth error
+        http.exceptionHandling().and().httpBasic() // Handle auth error
                 .and().csrf().disable().headers().frameOptions().disable()// for Postman, the H2 console.
                 .and().authorizeRequests()// manage access
                 .antMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()//
@@ -30,14 +33,8 @@ public class SecurityConfig {
                 .mvcMatchers("/api/admin/**").hasAuthority(Role.ADMIN)//
                 .mvcMatchers("/api/admin/user/**").hasAuthority(Role.ADMIN)//
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)//
-                .and().exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         ;
         return http.build();
-    }
-
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler() {
-        return new AccessDeniedHandlerImpl();
     }
 
 }

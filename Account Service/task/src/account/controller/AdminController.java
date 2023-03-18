@@ -52,7 +52,13 @@ public class AdminController {
             case "REMOVE" -> userService.removeRole(request.user(), roleName);
             default -> throw new InvalidMethodException();
         };
-        eventService.registerEvent(request.operation().equals("GRANT") ? Event.ACTION.GRANT_ROLE : Event.ACTION.REMOVE_ROLE, request.user(), subject.getUsername(), "/api/admin/user/role");
+        List<String> message = List.of(request.operation().equals("GRANT") ? "Grant" : "Remove",
+                "role", request.role(), "to", user.getEmail());
+
+        eventService.registerEvent(request.operation().equals("GRANT") ? Event.ACTION.GRANT_ROLE : Event.ACTION.REMOVE_ROLE,
+                subject.getUsername(),
+                String.join(" ", message),
+                "/api/admin/user/role");
         return new UserResponse(user);
     }
 

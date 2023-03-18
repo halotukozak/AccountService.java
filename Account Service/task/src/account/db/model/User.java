@@ -28,7 +28,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank(message = "Name cannot be blank") String name;
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotBlank(message = "Username cannot be blank")
     private String username;
     @NotBlank(message = "Lastname cannot be blank")
     private String lastname;
@@ -63,6 +63,7 @@ public class User implements UserDetails {
         this.setName(firstname);
         this.setLastname(lastname);
         this.setEmail(email);
+        this.setUsername(this.email);
         this.setPassword(password);
     }
 
