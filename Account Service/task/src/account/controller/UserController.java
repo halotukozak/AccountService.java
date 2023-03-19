@@ -33,7 +33,7 @@ public class UserController {
     @PostMapping("/signup")
     UserResponse register(@Valid @RequestBody RegistrationRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.registerUser(request.name(), request.lastname(), request.email(), request.password());
-        eventService.registerEvent(Event.ACTION.CREATE_USER, userDetails != null ? user.getUsername() : "Anonymous", user.getEmail(), "/api/path");
+        eventService.registerEvent(Event.ACTION.CREATE_USER, userDetails != null ? user.getUsername() : "Anonymous", user.getEmail());
         return new UserResponse(user);
     }
 

@@ -1,8 +1,8 @@
 package account.db.model;
 
-import account.exceptions.RemoveAdministratorException;
-import account.exceptions.RemoveLastRoleException;
-import account.exceptions.UserDoesNotHaveRoleException;
+import account.exceptions.role.RemoveAdministratorException;
+import account.exceptions.role.RemoveLastRoleException;
+import account.exceptions.role.UserDoesNotHaveRoleException;
 import account.security.validation.NonPwnedPassword;
 import lombok.Getter;
 import lombok.Setter;

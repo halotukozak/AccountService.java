@@ -16,15 +16,22 @@ import static account.db.model.Privilege.UPLOAD_PAYMENT;
 @Configuration
 @EnableWebSecurity(debug = true)
 public class SecurityConfig {
+    private final AccessDeniedHandlerImpl accessDeniedHandler;
+
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Autowired
-    AccessDeniedHandlerImpl accessDeniedHandler;
+    public SecurityConfig(AccessDeniedHandlerImpl accessDeniedHandler, RestAuthenticationEntryPoint restAuthenticationEntryPoint) {
+        this.accessDeniedHandler = accessDeniedHandler;
+        this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.exceptionHandling().and().httpBasic() // Handle auth error
-                .and().csrf().disable().headers().frameOptions().disable()// for Postman, the H2 console.
-                .and().authorizeRequests()// manage access
+        http.httpBasic()
+                .authenticationEntryPoint(restAuthenticationEntryPoint)// Handle auth error
+                .and().csrf().disable().headers().frameOptions().disable() // for Postman, the H2 console
+                .and().authorizeRequests() // manage access
                 .antMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()//
                 .mvcMatchers(HttpMethod.POST, "/api/auth/changepass").authenticated() // manage access
                 .mvcMatchers(HttpMethod.GET, "/api/empl/payment").hasAuthority(READ_PAYMENT)//
@@ -33,6 +40,7 @@ public class SecurityConfig {
                 .mvcMatchers("/api/admin/**").hasAuthority(Role.ADMIN)//
                 .mvcMatchers("/api/admin/user/**").hasAuthority(Role.ADMIN)//
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)//
+                .and().exceptionHandling();
         ;
         return http.build();
     }

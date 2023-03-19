@@ -2,7 +2,7 @@ package account.controller;
 
 import account.db.model.Event;
 import account.db.model.User;
-import account.exceptions.InvalidMethodException;
+import account.exceptions.role.InvalidMethodException;
 import account.http.request.ChangeLockRequest;
 import account.http.request.GiveRoleRequest;
 import account.http.response.ChangeUserLockResponse;
@@ -40,7 +40,7 @@ public class AdminController {
     @DeleteMapping("/{email}")
     DeletedUserResponse deleteUser(@PathVariable String email, @AuthenticationPrincipal UserDetails subject) {
         userService.deleteUserByEmail(email);
-        eventService.registerEvent(Event.ACTION.DELETE_USER, email, subject.getUsername(), "/api/admin/user");
+        eventService.registerEvent(Event.ACTION.DELETE_USER, email, subject.getUsername());
         return new DeletedUserResponse(email);
     }
 
@@ -57,23 +57,21 @@ public class AdminController {
 
         eventService.registerEvent(request.operation().equals("GRANT") ? Event.ACTION.GRANT_ROLE : Event.ACTION.REMOVE_ROLE,
                 subject.getUsername(),
-                String.join(" ", message),
-                "/api/admin/user/role");
+                String.join(" ", message));
         return new UserResponse(user);
     }
 
     @PutMapping("/access")
     ChangeUserLockResponse changeUserLock(@RequestBody ChangeLockRequest request, @AuthenticationPrincipal UserDetails subject) {
-        final String path = "/api/admin/user/access";
         switch (request.operation()) {
             case "LOCK" -> {
                 userService.lock(request.user());
-                eventService.registerEvent(Event.ACTION.LOCK_USER, request.user(), subject.getUsername(), path);
+                eventService.registerEvent(Event.ACTION.LOCK_USER, request.user(), subject.getUsername());
                 return ChangeUserLockResponse.lock(request.user());
             }
             case "UNLOCK" -> {
                 userService.unlock(request.user());
-                eventService.registerEvent(Event.ACTION.UNLOCK_USER, request.user(), subject.getUsername(), path);
+                eventService.registerEvent(Event.ACTION.UNLOCK_USER, request.user(), subject.getUsername());
                 return ChangeUserLockResponse.unlock(request.user());
             }
             default -> throw new InvalidMethodException();

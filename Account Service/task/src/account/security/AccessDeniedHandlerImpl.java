@@ -2,40 +2,34 @@ package account.security;
 
 import account.db.model.Event;
 import account.db.model.User;
+import account.http.response.ErrorResponse;
 import account.service.EventService;
 import account.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
 
 @Component
-public class AccessDeniedHandlerImpl extends SimpleUrlAuthenticationFailureHandler {
+public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
 
+    private final EventService eventService;
+    private final UserService userService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    final
-    UserService userService;
-    final
-    EventService eventService;
-
-    public AccessDeniedHandlerImpl(UserService userService, EventService eventService) {
-        this.userService = userService;
+    @Autowired
+    public AccessDeniedHandlerImpl(EventService eventService, UserService userService) {
         this.eventService = eventService;
+        this.userService = userService;
     }
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
         String email = request.getParameter("email");
         if (email != null) {
@@ -47,19 +41,10 @@ public class AccessDeniedHandlerImpl extends SimpleUrlAuthenticationFailureHandl
             }
         }
 
-        Map<String, Object> data = new HashMap<>();
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        data.put("timestamp", Calendar.getInstance().getTime());
-        data.put("status", HttpServletResponse.SC_FORBIDDEN);
-        data.put("error", "Forbidden");
-        data.put("message", "Access Denied!");
-        data.put("path", request.getRequestURI());
+        ErrorResponse responseData = new ErrorResponse(LocalDateTime.now(), HttpServletResponse.SC_FORBIDDEN, "Forbidden", "Access Denied!", request.getRequestURI());
 
-        response.getOutputStream().println(objectMapper.writeValueAsString(data));
-
-        eventService.registerEvent(Event.ACTION.LOGIN_FAILED, email, request.getRequestURI(), request.getRequestURI());
-
-        super.onAuthenticationFailure(request, response, exception);
+        response.getOutputStream().println(responseData.toString());
+        eventService.registerEvent(Event.ACTION.LOGIN_FAILED, email, request.getRequestURI());
     }
-
 }

@@ -2,8 +2,8 @@ package account.service;
 
 import account.db.model.Payment;
 import account.db.repository.PaymentRepository;
-import account.exceptions.NoSuchPaymentException;
-import account.exceptions.OccupiedPeriodException;
+import account.exceptions.payment.NoSuchPaymentException;
+import account.exceptions.payment.OccupiedPeriodException;
 import account.http.request.PaymentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

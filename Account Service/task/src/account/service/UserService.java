@@ -5,8 +5,12 @@ import account.db.model.Role;
 import account.db.model.User;
 import account.db.repository.RoleRepository;
 import account.db.repository.UserRepository;
-import account.exceptions.*;
-import account.exceptions.exceptions.IdenticalPassword;
+import account.exceptions.role.InvalidRoleCombinationException;
+import account.exceptions.role.RemoveAdministratorException;
+import account.exceptions.role.RoleNotFoundException;
+import account.exceptions.user.IdenticalPassword;
+import account.exceptions.user.EmailNotFoundException;
+import account.exceptions.user.UserExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -49,7 +53,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User registerUser(String name, String lastname, String email, String password) {
-        if (this.existsEmail(email)) throw new UserExistException();
+        if (this.existsEmail(email)) throw new UserExistsException();
         User user = new User(name, lastname, email, passwordEncoder.encode(password));
 
         if (userRepository.existsByRoles_Name(Role.ADMIN)) {
@@ -119,7 +123,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void restFailedAttempts(User user) {
+    public void resetFailedAttempts(User user) {
         user.resetAttempt();
         userRepository.save(user);
     }
