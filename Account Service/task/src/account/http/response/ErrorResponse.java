@@ -13,7 +13,7 @@ public final class ErrorResponse {
 
 
     public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, String path) {
-        data.put("timestamp", timestamp);
+        data.put("timestamp", timestamp.toString());
         data.put("status", status);
         data.put("error", error);
         data.put("message", message);

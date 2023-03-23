@@ -7,6 +7,7 @@ import account.http.response.OKResponse;
 import account.http.response.PaymentResponse;
 import account.service.PaymentService;
 import account.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,17 +21,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @Validated
+@AllArgsConstructor
 public class PaymentController {
     private final UserService userService;
     private final PaymentService paymentService;
-
-
-    @Autowired
-    public PaymentController(UserService userService, PaymentService paymentService) {
-        this.userService = userService;
-        this.paymentService = paymentService;
-    }
-
 
     @GetMapping("/empl/payment")
     ResponseEntity<?> getPayments(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(required = false) String period) {

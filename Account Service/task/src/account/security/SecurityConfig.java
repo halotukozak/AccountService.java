@@ -1,7 +1,7 @@
 package account.security;
 
 import account.db.model.Role;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,16 +15,11 @@ import static account.db.model.Privilege.UPLOAD_PAYMENT;
 
 @Configuration
 @EnableWebSecurity(debug = true)
+@AllArgsConstructor
 public class SecurityConfig {
     private final AccessDeniedHandlerImpl accessDeniedHandler;
 
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-
-    @Autowired
-    public SecurityConfig(AccessDeniedHandlerImpl accessDeniedHandler, RestAuthenticationEntryPoint restAuthenticationEntryPoint) {
-        this.accessDeniedHandler = accessDeniedHandler;
-        this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -39,8 +34,10 @@ public class SecurityConfig {
                 .mvcMatchers(HttpMethod.PUT, "/api/acct/payments").hasAuthority(UPLOAD_PAYMENT)//
                 .mvcMatchers("/api/admin/**").hasAuthority(Role.ADMIN)//
                 .mvcMatchers("/api/admin/user/**").hasAuthority(Role.ADMIN)//
+                .mvcMatchers("api/security/events").hasAuthority(Role.AUDITOR)//
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)//
-                .and().exceptionHandling();
+                .and().exceptionHandling().accessDeniedHandler(accessDeniedHandler)
+
         ;
         return http.build();
     }

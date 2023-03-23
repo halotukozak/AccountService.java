@@ -5,6 +5,7 @@ import account.db.repository.PaymentRepository;
 import account.exceptions.payment.NoSuchPaymentException;
 import account.exceptions.payment.OccupiedPeriodException;
 import account.http.request.PaymentRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,16 +15,12 @@ import java.util.List;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final EventService eventService;
 
-    @Autowired
-    public PaymentService(PaymentRepository paymentRepository, EventService eventService) {
-        this.paymentRepository = paymentRepository;
-        this.eventService = eventService;
-    }
 
     public Payment getPayment(String employee, String period) {
         Payment result = paymentRepository.findByEmployeeAndPeriod(employee, period);

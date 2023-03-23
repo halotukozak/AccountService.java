@@ -17,7 +17,7 @@ public class Role {
     public static final String ADMIN = "ROLE_ADMINISTRATOR";
     public static final String ACCOUNTANT = "ROLE_ACCOUNTANT";
     public static final String AUDITOR = "ROLE_AUDITOR";
-    public static final List<String> BUSINESS = List.of(USER, ACCOUNTANT);
+    public static final List<String> BUSINESS = List.of(USER, ACCOUNTANT, AUDITOR);
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

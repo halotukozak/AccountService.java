@@ -8,10 +8,10 @@ import account.db.repository.UserRepository;
 import account.exceptions.role.InvalidRoleCombinationException;
 import account.exceptions.role.RemoveAdministratorException;
 import account.exceptions.role.RoleNotFoundException;
-import account.exceptions.user.IdenticalPassword;
 import account.exceptions.user.EmailNotFoundException;
+import account.exceptions.user.IdenticalPassword;
 import account.exceptions.user.UserExistsException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,23 +23,13 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-
-
     public static final int MAX_FAILED_ATTEMPTS = 5;
-
-
-    @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
 
     public boolean existsEmail(String email) {
         return userRepository.existsByEmail(email.toLowerCase());
@@ -71,14 +61,10 @@ public class UserService implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws EmailNotFoundException {
+    public UserDetails loadUserByUsername(String email) {
         Optional<User> user = userRepository.findByEmail(email.toLowerCase());
 
-        if (user.isPresent()) {
-            return user.get();
-        } else {
-            throw new EmailNotFoundException();
-        }
+        return user.orElse(null);
     }
 
 
@@ -99,7 +85,7 @@ public class UserService implements UserDetailsService {
         User user = (User) loadUserByUsername(email);
         Role role = roleRepository.findByName(role_name);
         if (role == null) throw new RoleNotFoundException();
-        if ((role_name.equals(Role.ADMIN) && user.isBusinessUser()) || ((Role.BUSINESS.contains(role_name) && user.isAdmin())))
+        if ((role_name.equals(Role.ADMIN) && user.isBusinessUser()) || (Role.BUSINESS.contains(role_name) && user.isAdmin()))
             throw new InvalidRoleCombinationException();
         user.giveRole(role);
         userRepository.save(user);
@@ -117,27 +103,23 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public void increaseFailedAttempts(User user) {
+    public boolean increaseFailedAttempts(User user) {
         user.increaseAttempt();
-        if (user.getFailedAttempt() >= MAX_FAILED_ATTEMPTS) user.lock();
         userRepository.save(user);
+        return user.getFailedAttempt() > MAX_FAILED_ATTEMPTS;
     }
 
-    public void resetFailedAttempts(User user) {
-        user.resetAttempt();
-        userRepository.save(user);
-    }
+    public void lock(User user) {
 
-    public void lock(String email) {
-        User user = (User) loadUserByUsername(email);
         user.lock();
         userRepository.save(user);
     }
 
-    public void unlock(String email) {
-        User user = (User) loadUserByUsername(email);
+    public void unlock(User user) {
+        user.resetFailedAttempts();
         user.unlock();
         userRepository.save(user);
     }
+
 }
 

@@ -42,6 +42,7 @@ public class UserController {
     ChangePasswordResponse changePass(@Valid @RequestBody ChangePasswordRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         User user = (User) userDetails;
         userService.changePassword(user, request.new_password());
+        eventService.registerEvent(Event.ACTION.CHANGE_PASSWORD, user.getEmail(), user.getEmail());
         return new ChangePasswordResponse(user.getEmail());
     }
 }

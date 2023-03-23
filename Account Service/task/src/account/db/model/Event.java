@@ -1,6 +1,11 @@
 package account.db.model;
 
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -9,13 +14,17 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
+@Data
 @NoArgsConstructor
 public class Event {
     @Id
     @GeneratedValue
+    @JsonIgnore
     private Long id;
 
+    @JsonIgnore
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
     private ACTION action;
     private String subject;

@@ -2,6 +2,7 @@ package account.controller;
 
 import account.db.model.Event;
 import account.db.model.User;
+import account.exceptions.user.LockAdministratorException;
 import account.exceptions.role.InvalidMethodException;
 import account.http.request.ChangeLockRequest;
 import account.http.request.GiveRoleRequest;
@@ -9,7 +10,9 @@ import account.http.response.ChangeUserLockResponse;
 import account.http.response.DeletedUserResponse;
 import account.http.response.UserResponse;
 import account.service.EventService;
+import account.service.FailedAttemptService;
 import account.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
@@ -21,15 +24,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/admin/user")
 @Validated
+@AllArgsConstructor
 public class AdminController {
     private final UserService userService;
     private final EventService eventService;
+    private final FailedAttemptService failedAttemptService;
 
-
-    public AdminController(UserService userService, EventService eventService) {
-        this.userService = userService;
-        this.eventService = eventService;
-    }
 
     @GetMapping
     List<UserResponse> getUser() {
@@ -40,7 +40,7 @@ public class AdminController {
     @DeleteMapping("/{email}")
     DeletedUserResponse deleteUser(@PathVariable String email, @AuthenticationPrincipal UserDetails subject) {
         userService.deleteUserByEmail(email);
-        eventService.registerEvent(Event.ACTION.DELETE_USER, email, subject.getUsername());
+        eventService.registerEvent(Event.ACTION.DELETE_USER, subject.getUsername(), email);
         return new DeletedUserResponse(email);
     }
 
@@ -53,7 +53,7 @@ public class AdminController {
             default -> throw new InvalidMethodException();
         };
         List<String> message = List.of(request.operation().equals("GRANT") ? "Grant" : "Remove",
-                "role", request.role(), "to", user.getEmail());
+                "role", request.role(), request.operation().equals("GRANT") ? "to" : "from", user.getEmail());
 
         eventService.registerEvent(request.operation().equals("GRANT") ? Event.ACTION.GRANT_ROLE : Event.ACTION.REMOVE_ROLE,
                 subject.getUsername(),
@@ -63,16 +63,16 @@ public class AdminController {
 
     @PutMapping("/access")
     ChangeUserLockResponse changeUserLock(@RequestBody ChangeLockRequest request, @AuthenticationPrincipal UserDetails subject) {
+        User user = (User) userService.loadUserByUsername(request.user());
         switch (request.operation()) {
             case "LOCK" -> {
-                userService.lock(request.user());
-                eventService.registerEvent(Event.ACTION.LOCK_USER, request.user(), subject.getUsername());
-                return ChangeUserLockResponse.lock(request.user());
+                if (user.isAdmin()) throw new LockAdministratorException();
+                failedAttemptService.lock(user, subject.getUsername());
+                return ChangeUserLockResponse.lock(user.getEmail());
             }
             case "UNLOCK" -> {
-                userService.unlock(request.user());
-                eventService.registerEvent(Event.ACTION.UNLOCK_USER, request.user(), subject.getUsername());
-                return ChangeUserLockResponse.unlock(request.user());
+                failedAttemptService.unlock(user, subject.getUsername());
+                return ChangeUserLockResponse.unlock(user.getEmail());
             }
             default -> throw new InvalidMethodException();
         }

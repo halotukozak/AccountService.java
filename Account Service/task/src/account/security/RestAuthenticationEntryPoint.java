@@ -1,9 +1,9 @@
 package account.security;
 
-import account.db.model.User;
 import account.service.EventService;
+import account.service.FailedAttemptService;
 import account.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -15,14 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Base64;
 
-import static account.db.model.Event.ACTION.LOGIN_FAILED;
-
 @Component
+@AllArgsConstructor
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
-    @Autowired
-    EventService eventService;
-    @Autowired
-    UserService userService;
+    private final FailedAttemptService failedAttemptService;
 
     @Override
     public void commence(HttpServletRequest request,
@@ -32,15 +28,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         if (authorization != null) {
             String email = new String(Base64.getDecoder().decode(authorization.split("\\s+")[1])).split(":")[0];
             String path = ServletUriComponentsBuilder.fromCurrentRequest().build().getPath();
-            User user = (User) userService.loadUserByUsername(email);
-            if (user == null)
-                eventService.registerEvent(LOGIN_FAILED, email, path);
-            else {
-                if (user.isAccountNonLocked()) {
-                    eventService.registerEvent(LOGIN_FAILED, user.getEmail(), path);
-                    userService.increaseFailedAttempts(user);
-                }
-            }
+            failedAttemptService.increaseFailedAttempt(email, path);
         }
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
     }

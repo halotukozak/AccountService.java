@@ -4,8 +4,7 @@ import account.exceptions.role.RemoveAdministratorException;
 import account.exceptions.role.RemoveLastRoleException;
 import account.exceptions.role.UserDoesNotHaveRoleException;
 import account.security.validation.NonPwnedPassword;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.hibernate.annotations.SortNatural;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,8 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
+@Data
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -114,7 +112,7 @@ public class User implements UserDetails {
         this.failedAttempt++;
     }
 
-    public void resetAttempt() {
+    public void resetFailedAttempts() {
         this.failedAttempt = 0;
     }
 
@@ -125,5 +123,9 @@ public class User implements UserDetails {
     public void unlock() {
         this.isAccountNonLocked = true;
 
+    }
+
+    public boolean isAccountLocked() {
+        return !isAccountNonLocked;
     }
 }
